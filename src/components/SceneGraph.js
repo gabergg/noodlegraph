@@ -38,7 +38,9 @@ class SceneGraph extends Component {
       to: targetScene.id,
     };
 
-    onConnectionChange('create', [newConnections[connectionId]]);
+    onConnectionChange('create', {
+      [connectionId]: newConnections[connectionId]
+    });
     onChange(update(data, {
       connections: { $set: newConnections },
     }));
@@ -54,7 +56,7 @@ class SceneGraph extends Component {
           startX: connection.startX + delta.x,
           startY: connection.startY + delta.y,
         };
-        updatedConnections.push(updatedConnection);
+        updatedConnections[connection.id] = updatedConnection;
         return updatedConnection;
       } else {
         return connection;
@@ -62,7 +64,7 @@ class SceneGraph extends Component {
     });
 
     if (updatedConnections.length)
-      onConnectionChange('update', [updatedConnections]);
+      onConnectionChange('update', updatedConnections);
     onChange(update(data, {
       scenes: {
         [scene.id]: {
@@ -81,12 +83,14 @@ class SceneGraph extends Component {
       oldConnection.startX === newLocation.x &&
       oldConnection.startY === newLocation.y)
       return;
-    onConnectionChange('update', [{
+    onConnectionChange('update', {
+      [id]: {
         ...oldConnection,
         from: newStartSceneId,
         startX: newLocation.x,
         startY: newLocation.y,
-    }])
+      }
+    })
     onChange(update(this.props.data, {
       connections: {
         [id]: {
@@ -103,10 +107,12 @@ class SceneGraph extends Component {
     const oldConnection = data.connections[id];
     if (oldConnection.to === newEndSceneId)
       return;
-    onConnectionChange('update', [{
+    onConnectionChange('update', {
+      [id]: {
         ...oldConnection,
         to: newEndSceneId,
-    }]);
+      }
+    });
     onChange(update(data, {
       connections: {
         [id]: {
@@ -133,7 +139,9 @@ class SceneGraph extends Component {
 
   handleRemoveConnection = (id) => {
     const { data, onConnectionChange, onChange } = this.props;
-    onConnectionChange('delete', [data.connections[id]])
+    onConnectionChange('delete', {
+      [id]: data.connections[id],
+    })
     onChange(update(this.props.data, {
       connections: {
         $set: _.omit(data.connections, id),
