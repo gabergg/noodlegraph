@@ -4,6 +4,10 @@ import _ from 'lodash';
 import SceneGraph from '../src';
 import Scene from './components/Scene';
 import SceneHeader from './components/SceneHeader';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
+const SceneGraphDraggableContext = DragDropContext(HTML5Backend)(SceneGraph);
 
 export default class Demo extends Component {
   state = {
@@ -14,10 +18,11 @@ export default class Demo extends Component {
     },
     connections: {},
     viewport: {
-      x: 0,
+      x: 300,
       y: 0,
-      width: 1500,
-      height: 1500,
+      width: 600,
+      height: 600,
+      scale: 1,
     },
   };
 
@@ -49,9 +54,16 @@ export default class Demo extends Component {
   }
 
   render() {
+    const style = {
+      width: '100%', 
+      height: '100%',
+    }
+
     return (
-      <SceneGraph
+      <SceneGraphDraggableContext
+        style={style}
         data={this.state}
+        viewport={this.state.viewport}
         onChange={this.handleChange}
         onDragConnectionStart={this.handleDragConnectionStart}
         renderScene={this.renderScene}

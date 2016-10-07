@@ -172,6 +172,8 @@ class SceneGraph extends Component {
           onDragConnectionEnd={this.handleDragConnectionEnd}
           onDragConnectionStart={onDragConnectionStart}
           onDragSceneEnd={this.handleDragSceneEnd}
+          onPanMove={(delta) => console.log('delta', delta)}
+          onPanEnd={(delta) => console.log('delta', delta)}
           onTargetlessConnectionDrop={this.handleRemoveConnection}
           renderScene={renderScene}
           renderSceneHeader={renderSceneHeader}

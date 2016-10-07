@@ -4,6 +4,7 @@ import shouldPureComponentUpdate from '../utils/shouldPureComponentUpdate';
 import update from 'react/lib/update';
 import ItemTypes from '../constants/ItemTypes';
 import Connection from './Connection';
+import Pan from './Pan';
 import DraggableScene from './DraggableScene';
 import _ from 'lodash';
 
@@ -154,16 +155,37 @@ class Container extends Component {
       connections,
       scenes,
       showConnections,
+      viewport,
+      handlePanStart,
+      handlePanMove,
+      handlePanEnd,
+      cursor,
     } = this.props;
+    
+    const viewportStyle = {
+      width: viewport.width,
+      height: viewport.height,
+      left: viewport.x,
+      top: viewport.y,
+      backgroundColor: 'teal',
+      cursor,
+    }
 
     return connectDropTarget(
-      <div style={containerStyles}>
-        {Object.keys(scenes)
-          .map(key => this.renderDraggableScene(scenes[key]))
-        }
-        {showConnections && Object.keys(connections)
-          .map(key => this.renderConnection(connections[key]))
-        }
+      <div 
+        style={containerStyles}
+        onMouseDown={handlePanStart}
+        onMouseMove={handlePanMove}
+        onMouseUp={handlePanEnd}
+      >
+        <div style={viewportStyle}>
+          {Object.keys(scenes)
+            .map(key => this.renderDraggableScene(scenes[key]))
+          }
+          {showConnections && Object.keys(connections)
+            .map(key => this.renderConnection(connections[key]))
+          }
+        </div>
       </div>
     );
   }
@@ -178,4 +200,4 @@ const dropfun = (props, monitor) => {
 
 export default DropTarget(ItemTypes.SCENE, {drop: dropfun}, connect => ({
   connectDropTarget: connect.dropTarget()
-}))(Container)
+}))(Pan(Container))
