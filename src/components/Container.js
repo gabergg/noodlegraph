@@ -124,6 +124,7 @@ class Container extends Component {
       renderSceneHeader,
       updateConnectionEnd,
       updateConnectionStart,
+      viewport,
     } = this.props;
 
     const { currentConnectionOrigin, draggedScene } = this.state;
@@ -131,6 +132,14 @@ class Container extends Component {
     if (draggedScene.id === scene.id)
       return null
 
+    scene = {
+      ...scene,
+      x: viewport.scale * (scene.x + viewport.x),
+      y: viewport.scale * (scene.y + viewport.y),
+      width: viewport.scale * scene.width,
+      height: viewport.scale * scene.height,
+    }
+      
     return (
       <DraggableScene
         connectionLocation={currentConnectionOrigin}
@@ -163,13 +172,19 @@ class Container extends Component {
     } = this.props;
     
     const viewportStyle = {
+      position: 'absolute',
       width: viewport.width,
       height: viewport.height,
-      left: viewport.x,
-      top: viewport.y,
       backgroundColor: 'teal',
       cursor,
-    }
+      overflow: 'hidden',
+    };
+    
+    const canvasStyle = {
+      position: 'absolute',
+      left: viewport.x,
+      top: viewport.y,
+    };
 
     return connectDropTarget(
       <div 
@@ -179,12 +194,14 @@ class Container extends Component {
         onMouseUp={handlePanEnd}
       >
         <div style={viewportStyle}>
-          {Object.keys(scenes)
-            .map(key => this.renderDraggableScene(scenes[key]))
-          }
-          {showConnections && Object.keys(connections)
-            .map(key => this.renderConnection(connections[key]))
-          }
+          {/*<div style={canvasStyle}>*/}
+            {Object.keys(scenes)
+              .map(key => this.renderDraggableScene(scenes[key]))
+            }
+            {showConnections && Object.keys(connections)
+              .map(key => this.renderConnection(connections[key]))
+            }
+          {/*</div>*/}
         </div>
       </div>
     );

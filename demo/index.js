@@ -18,16 +18,21 @@ export default class Demo extends Component {
     },
     connections: {},
     viewport: {
-      x: 300,
+      x: 0,
       y: 0,
-      width: 600,
-      height: 600,
-      scale: 1,
+      width: 1000,
+      height: 1000,
+      scale: 2,
     },
   };
 
   handleChange = (data) => {
     this.setState({...data});
+  }
+  
+  handleViewportChange = (viewport) => {
+    console.log('updating vp', viewport)
+    this.setState({viewport});
   }
 
   handleDragConnectionStart = (sourceScene, relativeClickLoc) => {
@@ -55,8 +60,12 @@ export default class Demo extends Component {
 
   render() {
     const style = {
-      width: '100%', 
-      height: '100%',
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      overflow: 'hidden',
     }
 
     return (
@@ -66,6 +75,7 @@ export default class Demo extends Component {
         viewport={this.state.viewport}
         onChange={this.handleChange}
         onDragConnectionStart={this.handleDragConnectionStart}
+        onViewportChange={this.handleViewportChange}
         renderScene={this.renderScene}
         renderSceneHeader={this.renderSceneHeader}
         showConnections={true}

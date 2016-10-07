@@ -12,6 +12,7 @@ export default (Wrapped) => class Pan extends Component {
     onPanStart: PropTypes.func,
     onPanMove: PropTypes.func,
     onPanEnd: PropTypes.func,
+    captureEvents: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -33,6 +34,8 @@ export default (Wrapped) => class Pan extends Component {
   }
   
   handleKeyDown = (e) => {
+    if (!this.props.captureEvents) return
+    
     const {panMode, panning, cursor} = this.state
     
     if (e.code === 'Space') {
@@ -50,6 +53,8 @@ export default (Wrapped) => class Pan extends Component {
   }
   
   handleKeyUp = (e) => {
+    if (!this.props.captureEvents) return
+    
     const {panMode, panning} = this.state
 
     if (e.code === 'Space') {
@@ -67,6 +72,8 @@ export default (Wrapped) => class Pan extends Component {
   }
   
   handlePanStart = (e) => {
+    if (!this.props.captureEvents) return
+    
     const {panMode} = this.state
     
     if (panMode) {
@@ -86,6 +93,8 @@ export default (Wrapped) => class Pan extends Component {
   }
   
   handlePanMove = (e) => {
+    if (!this.props.captureEvents) return
+    
     const {panning} = this.state
     
     if (panning) {
@@ -103,6 +112,8 @@ export default (Wrapped) => class Pan extends Component {
   }
   
   handlePanEnd = (e) => {
+    if (!this.props.captureEvents) return
+    
     const {panMode, panning} = this.state
     
     if (panning) {
@@ -128,8 +139,6 @@ export default (Wrapped) => class Pan extends Component {
 
   render() {
     const {cursor} = this.state
-    
-    console.log(this.state)
     
     return (
       <Wrapped 

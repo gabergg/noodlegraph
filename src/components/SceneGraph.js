@@ -8,6 +8,7 @@ import getUUID from '../utils/getUUID'
 
 class SceneGraph extends Component {
   static propTypes = {
+    focused: PropTypes.bool,
     onChange: PropTypes.func.isRequired,
     onDragConnectionStart: PropTypes.func.isRequired,
     renderScene: PropTypes.func.isRequired,
@@ -16,13 +17,16 @@ class SceneGraph extends Component {
     onConnectionChange: PropTypes.func,
     showConnections: PropTypes.bool,
     style: PropTypes.object,
+    onViewportChange: PropTypes.func,
     viewport: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
     data: {},
+    focused: true,
     showConnections: true,
     onConnectionChange: () => {},
+    onViewportChange: () => {},
   };
 
   handleDragConnectionEnd = (sourceScene, sourceInitialOffset, targetScene) => {
@@ -48,15 +52,16 @@ class SceneGraph extends Component {
     }));
   }
 
-  handleDragSceneEnd = (scene, delta) => {
-    const { data, onChange, onConnectionChange } = this.props;
+  handleDragSceneEnd = ({id}, delta) => {
+    const { data, onChange, onConnectionChange, viewport } = this.props;
+    const scene = data.scenes[id]
     const updatedConnections = {}
     const newConnections = _.mapValues(data.connections, (connection) => {
-      if (connection.from === scene.id) {
+      if (connection.from === id) {
         const updatedConnection = {
           ...connection,
-          startX: connection.startX + delta.x,
-          startY: connection.startY + delta.y,
+          startX: connection.startX + (delta.x / viewport.scale),
+          startY: connection.startY + (delta.y / viewport.scale),
         };
         updatedConnections[connection.id] = updatedConnection;
         return updatedConnection;
@@ -68,11 +73,14 @@ class SceneGraph extends Component {
     if (Object.keys(updatedConnections).length) {
       onConnectionChange('update', updatedConnections);
     }
+    
+    console.log('updating scenes', delta, scene.id, scene.x, scene.y)
+    
     onChange(update(data, {
       scenes: {
         [scene.id]: {
-          x: { $set: scene.x + delta.x },
-          y: { $set: scene.y + delta.y },
+          x: { $set: scene.x + (delta.x / viewport.scale) },
+          y: { $set: scene.y + (delta.y / viewport.scale) },
         },
       },
       connections: { $set: newConnections },
@@ -153,10 +161,22 @@ class SceneGraph extends Component {
       }));
     }
   }
+  
+  handleViewportChange = (delta) => {
+    const {viewport} = this.props;
+    const {x, y} = delta;
+    
+    this.props.onViewportChange({
+      ...viewport,
+      x: viewport.x + (x / viewport.scale),
+      y: viewport.y + (y / viewport.scale),
+    })
+  }
 
   render() {
     const {
       data,
+      focused,
       onDragConnectionStart,
       renderScene,
       renderSceneHeader,
@@ -168,12 +188,12 @@ class SceneGraph extends Component {
     return (
       <div style={style}>
         <Container
+          captureEvents={focused}
           connections={data.connections}
           onDragConnectionEnd={this.handleDragConnectionEnd}
           onDragConnectionStart={onDragConnectionStart}
           onDragSceneEnd={this.handleDragSceneEnd}
-          onPanMove={(delta) => console.log('delta', delta)}
-          onPanEnd={(delta) => console.log('delta', delta)}
+          onPanMove={this.handleViewportChange}
           onTargetlessConnectionDrop={this.handleRemoveConnection}
           renderScene={renderScene}
           renderSceneHeader={renderSceneHeader}
