@@ -21,12 +21,16 @@ class SceneGraph extends Component {
     onViewportChange: PropTypes.func,
     viewport: PropTypes.object.isRequired,
     zoomFactor: PropTypes.number,
+    zoomSensitivity: PropTypes.number,
+    scrollSensitivity: PropTypes.number,
   }
 
   static defaultProps = {
     data: {},
     focused: true,
     zoomFactor: 2,
+    zoomSensitivity: 1,
+    scrollSensitivity: 1,
     showConnections: true,
     onConnectionChange: () => {},
     onViewportChange: () => {},
@@ -207,6 +211,7 @@ class SceneGraph extends Component {
     e.stopPropagation();
     
     const {deltaX, deltaY} = e;
+    const {zoomSensitivity, scrollSensitivity} = this.props;
     
     // Zoom
     if (e.ctrlKey) {
@@ -216,11 +221,14 @@ class SceneGraph extends Component {
       // Negative deltaY means zoom out, positive means zoom in.
       // We subtract this delta from 1, since we later multiply by 
       // the current viewport scale.
-      this.zoomViewport(1 - (deltaY / 100));
+      this.zoomViewport(1 - (deltaY / 100) * zoomSensitivity);
       
     // Pan
     } else {
-      this.moveViewport({x: -deltaX / 3, y: -deltaY / 3});
+      this.moveViewport({
+        x: (-deltaX / 3) * scrollSensitivity, 
+        y: (-deltaY / 3) * scrollSensitivity,
+      });
     }
   }
   
