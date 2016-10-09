@@ -81,8 +81,6 @@ class SceneGraph extends Component {
       onConnectionChange('update', updatedConnections);
     }
     
-    console.log('updating scenes', delta, scene.id, scene.x, scene.y)
-    
     onChange(update(data, {
       scenes: {
         [scene.id]: {
@@ -171,13 +169,9 @@ class SceneGraph extends Component {
   
   moveViewport = (delta) => {
     const {viewport} = this.props;
-    const {x, y} = delta;
+    const newViewport = ViewportUtils.move(viewport, delta);
     
-    this.props.onViewportChange({
-      ...viewport,
-      x: viewport.x + (x / viewport.scale),
-      y: viewport.y + (y / viewport.scale),
-    });
+    this.props.onViewportChange(newViewport);
   }
   
   zoomViewport = (factor) => {
@@ -213,11 +207,9 @@ class SceneGraph extends Component {
     const {deltaX, deltaY} = e;
     const {zoomSensitivity, scrollSensitivity} = this.props;
     
-    // Zoom
+    // Zoom (ctrlKey indicates zoom)
     if (e.ctrlKey) {
       
-      // In Chrome:
-      // ctrlKey indicates zoom, with deltaY indicating the amount.
       // Negative deltaY means zoom out, positive means zoom in.
       // We subtract this delta from 1, since we later multiply by 
       // the current viewport scale.

@@ -1,13 +1,18 @@
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
 import _ from 'lodash';
-import SceneGraph from '../src';
+import SceneGraph, { ViewportUtils } from '../src';
 import Scene from './components/Scene';
 import SceneHeader from './components/SceneHeader';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 const SceneGraphDraggableContext = DragDropContext(HTML5Backend)(SceneGraph);
+
+const measureWindow = () => ({
+  width: document.documentElement.clientWidth,
+  height: document.documentElement.clientHeight,
+})
 
 export default class Demo extends Component {
   state = {
@@ -17,21 +22,30 @@ export default class Demo extends Component {
       '3': {id: '3', name: 'Scene3', y: 50, x: 850, width: 100, height: 200},
     },
     connections: {},
-    viewport: {
-      x: 0,
-      y: 0,
-      width: 400,
-      height: 400,
-      scale: 2,
-    },
+    viewport: ViewportUtils.init(measureWindow()),
   };
+  
+  componentDidMount() {
+    window.addEventListener('resize', this.handleResize);
+  }
+  
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+  
+  handleResize = () => {
+    const {viewport} = this.state;
+    
+    this.setState({
+      viewport: ViewportUtils.resize(viewport, measureWindow())
+    })
+  }
 
   handleChange = (data) => {
     this.setState({...data});
   }
   
   handleViewportChange = (viewport) => {
-    console.log('updating vp', viewport)
     this.setState({viewport});
   }
 
