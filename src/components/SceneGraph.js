@@ -5,6 +5,7 @@ import HTML5Backend from 'react-dnd-html5-backend'
 import CustomDragLayer from './CustomDragLayer'
 import Container from './Container'
 import getUUID from '../utils/getUUID'
+import * as ViewportUtils from '../utils/viewport'
 
 class SceneGraph extends Component {
   static propTypes = {
@@ -19,11 +20,13 @@ class SceneGraph extends Component {
     style: PropTypes.object,
     onViewportChange: PropTypes.func,
     viewport: PropTypes.object.isRequired,
+    zoomFactor: PropTypes.number,
   }
 
   static defaultProps = {
     data: {},
     focused: true,
+    zoomFactor: 2,
     showConnections: true,
     onConnectionChange: () => {},
     onViewportChange: () => {},
@@ -162,7 +165,7 @@ class SceneGraph extends Component {
     }
   }
   
-  handleViewportChange = (delta) => {
+  handleViewportMove = (delta) => {
     const {viewport} = this.props;
     const {x, y} = delta;
     
@@ -171,6 +174,40 @@ class SceneGraph extends Component {
       x: viewport.x + (x / viewport.scale),
       y: viewport.y + (y / viewport.scale),
     })
+  }
+  
+  zoomViewport = (factor) => {
+    const {viewport} = this.props;
+    const newViewport = ViewportUtils.zoom(viewport, factor);
+    
+    this.props.onViewportChange(newViewport);
+  }
+  
+  handleKeyDown = (e) => {  
+    const {focused, zoomFactor} = this.props;
+    
+    if (
+      focused &&
+      e.metaKey &&
+      (e.code === 'Equal' || e.code === 'Minus')
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (e.code === 'Equal') {
+        this.zoomViewport(zoomFactor);
+      } else {
+        this.zoomViewport(1 / zoomFactor);
+      }
+    }
+  }
+  
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown);
+  }
+  
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   render() {
@@ -193,8 +230,9 @@ class SceneGraph extends Component {
           onDragConnectionEnd={this.handleDragConnectionEnd}
           onDragConnectionStart={onDragConnectionStart}
           onDragSceneEnd={this.handleDragSceneEnd}
-          onPanMove={this.handleViewportChange}
+          onPanMove={this.handleViewportMove}
           onTargetlessConnectionDrop={this.handleRemoveConnection}
+          onZoom={this.handleViewportZoom}
           renderScene={renderScene}
           renderSceneHeader={renderSceneHeader}
           scenes={data.scenes}

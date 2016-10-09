@@ -20,8 +20,8 @@ export default class Demo extends Component {
     viewport: {
       x: 0,
       y: 0,
-      width: 1000,
-      height: 1000,
+      width: 400,
+      height: 400,
       scale: 2,
     },
   };

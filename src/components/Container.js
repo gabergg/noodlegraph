@@ -14,6 +14,7 @@ const containerStyles = {
   height: '100%',
   left: 0,
   top: 0,
+  backgroundColor: '#333',
 };
 
 class Container extends Component {
@@ -134,8 +135,8 @@ class Container extends Component {
 
     scene = {
       ...scene,
-      x: viewport.scale * (scene.x + viewport.x),
-      y: viewport.scale * (scene.y + viewport.y),
+      x: viewport.scale * (scene.x + viewport.x + viewport.width / 2),
+      y: viewport.scale * (scene.y + viewport.y + viewport.height / 2),
       width: viewport.scale * scene.width,
       height: viewport.scale * scene.height,
     }
@@ -173,19 +174,13 @@ class Container extends Component {
     
     const viewportStyle = {
       position: 'absolute',
-      width: viewport.width,
-      height: viewport.height,
+      width: viewport.width * viewport.scale,
+      height: viewport.height * viewport.scale,
       backgroundColor: 'teal',
       cursor,
       overflow: 'hidden',
     };
     
-    const canvasStyle = {
-      position: 'absolute',
-      left: viewport.x,
-      top: viewport.y,
-    };
-
     return connectDropTarget(
       <div 
         style={containerStyles}
@@ -194,14 +189,12 @@ class Container extends Component {
         onMouseUp={handlePanEnd}
       >
         <div style={viewportStyle}>
-          {/*<div style={canvasStyle}>*/}
-            {Object.keys(scenes)
-              .map(key => this.renderDraggableScene(scenes[key]))
-            }
-            {showConnections && Object.keys(connections)
-              .map(key => this.renderConnection(connections[key]))
-            }
-          {/*</div>*/}
+          {Object.keys(scenes)
+            .map(key => this.renderDraggableScene(scenes[key]))
+          }
+          {showConnections && Object.keys(connections)
+            .map(key => this.renderConnection(connections[key]))
+          }
         </div>
       </div>
     );
