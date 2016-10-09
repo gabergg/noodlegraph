@@ -165,7 +165,7 @@ class SceneGraph extends Component {
     }
   }
   
-  handleViewportMove = (delta) => {
+  moveViewport = (delta) => {
     const {viewport} = this.props;
     const {x, y} = delta;
     
@@ -173,7 +173,7 @@ class SceneGraph extends Component {
       ...viewport,
       x: viewport.x + (x / viewport.scale),
       y: viewport.y + (y / viewport.scale),
-    })
+    });
   }
   
   zoomViewport = (factor) => {
@@ -202,6 +202,28 @@ class SceneGraph extends Component {
     }
   }
   
+  handleWheel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const {deltaX, deltaY} = e;
+    
+    // Zoom
+    if (e.ctrlKey) {
+      
+      // In Chrome:
+      // ctrlKey indicates zoom, with deltaY indicating the amount.
+      // Negative deltaY means zoom out, positive means zoom in.
+      // We subtract this delta from 1, since we later multiply by 
+      // the current viewport scale.
+      this.zoomViewport(1 - (deltaY / 100));
+      
+    // Pan
+    } else {
+      this.moveViewport({x: -deltaX / 3, y: -deltaY / 3});
+    }
+  }
+  
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -223,16 +245,18 @@ class SceneGraph extends Component {
     } = this.props
 
     return (
-      <div style={style}>
+      <div 
+        style={style}
+        onWheel={this.handleWheel}
+      >
         <Container
           captureEvents={focused}
           connections={data.connections}
           onDragConnectionEnd={this.handleDragConnectionEnd}
           onDragConnectionStart={onDragConnectionStart}
           onDragSceneEnd={this.handleDragSceneEnd}
-          onPanMove={this.handleViewportMove}
+          onPanMove={this.moveViewport}
           onTargetlessConnectionDrop={this.handleRemoveConnection}
-          onZoom={this.handleViewportZoom}
           renderScene={renderScene}
           renderSceneHeader={renderSceneHeader}
           scenes={data.scenes}
