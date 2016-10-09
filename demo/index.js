@@ -10,8 +10,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 const SceneGraphDraggableContext = DragDropContext(HTML5Backend)(SceneGraph);
 
 const measureWindow = () => ({
-  width: document.documentElement.clientWidth,
-  height: document.documentElement.clientHeight,
+  width: window.innerWidth,
+  height: window.innerHeight,
 })
 
 export default class Demo extends Component {

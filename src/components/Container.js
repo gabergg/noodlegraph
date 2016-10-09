@@ -14,7 +14,6 @@ const containerStyles = {
   height: '100%',
   left: 0,
   top: 0,
-  backgroundColor: '#333',
 };
 
 class Container extends Component {
@@ -174,11 +173,10 @@ class Container extends Component {
     
     const viewportStyle = {
       position: 'absolute',
+      overflow: 'hidden',
       width: viewport.width * viewport.scale,
       height: viewport.height * viewport.scale,
-      backgroundColor: 'teal',
       cursor,
-      overflow: 'hidden',
     };
     
     return connectDropTarget(
