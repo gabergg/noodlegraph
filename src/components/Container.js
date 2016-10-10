@@ -48,7 +48,7 @@ class Container extends Component {
   };
 
   getScaledScene = (scene) => {
-    const {viewport} = this.props
+    const {viewport} = this.props;
     
     return {
       ...scene,
@@ -56,8 +56,18 @@ class Container extends Component {
       y: viewport.scale * (scene.y + viewport.y + viewport.height / 2),
       width: viewport.scale * scene.width,
       height: viewport.scale * scene.height,
-    }
-  }
+    };
+  };
+  
+  getScaledConnection = (connection) => {
+    const {viewport} = this.props;
+    
+    return {
+      ...connection,
+      startX: viewport.scale * (connection.startX + viewport.x + viewport.width / 2),
+      startY: viewport.scale * (connection.startY + viewport.y + viewport.height / 2),
+    };
+  };
   
   getEndingVertOffset = (connection, toScene) => {
     const connsEndingHere = _.sortBy(_.map(_.filter(this.props.connections, (conn, id) => {
@@ -117,14 +127,19 @@ class Container extends Component {
       return null;
     }
     const endingVertOffset = this.getEndingVertOffset(connection, toScene);
-    return <Connection
-      connection={connection}
-      endingScene={toScene}
-      endingVertOffset={endingVertOffset}
-      key={connection.id}
-      onConnectionDragChange={this.handleConnectionDragChange}
-      onTargetlessConnectionDrop={onTargetlessConnectionDrop}
-    />
+    
+    connection = this.getScaledConnection(connection);
+    
+    return (
+      <Connection
+        connection={connection}
+        endingScene={toScene}
+        endingVertOffset={endingVertOffset}
+        key={connection.id}
+        onConnectionDragChange={this.handleConnectionDragChange}
+        onTargetlessConnectionDrop={onTargetlessConnectionDrop}
+      />
+    );
   }
 
   renderDraggableScene(scene) {
