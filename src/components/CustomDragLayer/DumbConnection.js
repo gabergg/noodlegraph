@@ -3,6 +3,16 @@ import SVGComponent from '../SVGComponent';
 import CurvedLine from '../CurvedLine';
 import shallowEqual from '../../utils/shallowEqual';
 
+const layerStyles = {
+  position: 'absolute',
+  pointerEvents: 'none',
+  zIndex: 100,
+  left: 0,
+  top: 0,
+  width: '100%',
+  height: '100%',
+};
+
 const STROKE_COLOR = "#4A90E2";
 const STROKE_WIDTH = 2;
 
@@ -43,7 +53,7 @@ export default class DumbConnection extends Component {
         };
 
         return (
-          <div>
+          <div style={layerStyles}>
             <div style={getCircleStyle(startX, startY, false)}/>
             <SVGComponent
               height={'100%'}

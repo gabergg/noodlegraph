@@ -8,7 +8,7 @@ import SVGComponent from './SVGComponent';
 import getEndingConnectionLocation from '../utils/getEndingConnectionLocation';
 
 const layerStyles = {
-  position: 'fixed',
+  position: 'absolute',
   pointerEvents: 'none',
   zIndex: 100,
   left: 0,

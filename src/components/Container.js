@@ -47,6 +47,18 @@ class Container extends Component {
     sceneHeaderHeight: 0,
   };
 
+  getScaledScene = (scene) => {
+    const {viewport} = this.props
+    
+    return {
+      ...scene,
+      x: viewport.scale * (scene.x + viewport.x + viewport.width / 2),
+      y: viewport.scale * (scene.y + viewport.y + viewport.height / 2),
+      width: viewport.scale * scene.width,
+      height: viewport.scale * scene.height,
+    }
+  }
+  
   getEndingVertOffset = (connection, toScene) => {
     const connsEndingHere = _.sortBy(_.map(_.filter(this.props.connections, (conn, id) => {
       return conn.to === toScene.id;
@@ -98,8 +110,8 @@ class Container extends Component {
   renderConnection(connection) {
     const { onTargetedConnectionDrop, onTargetlessConnectionDrop, scenes } = this.props;
     const { draggedConnection, draggedScene } = this.state;
-    const fromScene = scenes[connection.from];
-    const toScene = scenes[connection.to];
+    const fromScene = this.getScaledScene(scenes[connection.from]);
+    const toScene = this.getScaledScene(scenes[connection.to]);
     if ([fromScene.id, toScene.id].includes(draggedScene.id) ||
         connection.id === draggedConnection.id) {
       return null;
@@ -132,13 +144,7 @@ class Container extends Component {
     if (draggedScene.id === scene.id)
       return null
 
-    scene = {
-      ...scene,
-      x: viewport.scale * (scene.x + viewport.x + viewport.width / 2),
-      y: viewport.scale * (scene.y + viewport.y + viewport.height / 2),
-      width: viewport.scale * scene.width,
-      height: viewport.scale * scene.height,
-    }
+    scene = this.getScaledScene(scene)
       
     return (
       <DraggableScene
