@@ -11,6 +11,7 @@ class SceneHeader extends Component {
     isSceneDragging: PropTypes.bool.isRequired,
     onSceneDragChange: PropTypes.func.isRequired,
     renderSceneHeader: PropTypes.func.isRequired,
+    scale: PropTypes.number.isRequired,
     scene: PropTypes.object.isRequired,
   };
 
@@ -31,11 +32,10 @@ class SceneHeader extends Component {
   }
 
   render() {
-    const { connectSceneDragSource, renderSceneHeader, scene } = this.props;
-
+    const { connectSceneDragSource, renderSceneHeader, scene, scale } = this.props;
     return connectSceneDragSource(
       <div>
-        {renderSceneHeader(scene)}
+        {renderSceneHeader({id: scene.id, scale})}
       </div>
     )
   }

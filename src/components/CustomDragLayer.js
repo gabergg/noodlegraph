@@ -5,6 +5,7 @@ import ItemTypes from '../constants/ItemTypes';
 import Connection from './Connection';
 import DumbConnection from './CustomDragLayer/DumbConnection';
 import SVGComponent from './SVGComponent';
+import * as SceneUtils from '../utils/scene';
 import getEndingConnectionLocation from '../utils/getEndingConnectionLocation';
 
 const layerStyles = {
@@ -18,17 +19,22 @@ const layerStyles = {
 };
 
 function getItemStyles(props) {
-  const { item, currentOffset, initialOffset } = props;
+  const { item, currentOffset, initialOffset, viewport } = props;
+
+  const scaledScene = SceneUtils.getScaledScene(item, viewport);
+
+  const xDelta = currentOffset.x - initialOffset.x;
+  const yDelta = currentOffset.y - initialOffset.y;
 
   return {
     position: 'absolute',
-    top: item.y + (currentOffset.y - initialOffset.y),
-    left: item.x + (currentOffset.x - initialOffset.x),
+    left: scaledScene.x + xDelta,
+    top: scaledScene.y + yDelta,
   };
 }
 
 function getModifiedScene(props, id) {
-  const { currentSourceOffset, initialSourceOffset, item, scenes, viewport } = props;
+  const { currentSourceOffset, initialSourceOffset, item, scenes } = props;
 
   if (!initialSourceOffset || !currentSourceOffset) {
     return item;
@@ -37,7 +43,6 @@ function getModifiedScene(props, id) {
   if (id === item.id) {
     return {
       ...item,
-      // need to dig into this mismatch.
       x: currentSourceOffset.x,
       y: currentSourceOffset.y,
     };
@@ -92,7 +97,7 @@ class CustomDragLayer extends Component {
   }
 
   renderConnection(connection) {
-    const { currentSourceOffset, initialSourceOffset, item, viewport } = this.props;
+    const { currentSourceOffset, initialSourceOffset, item } = this.props;
 
     const fromScene = getModifiedScene(this.props, connection.from);
     const toScene = getModifiedScene(this.props, connection.to);
@@ -118,7 +123,7 @@ class CustomDragLayer extends Component {
   }
 
   renderNewConnectionBeingDragged = () => {
-    const { currentOffset, initialOffset, viewport } = this.props;
+    const { currentOffset, initialOffset } = this.props;
 
     return (
       <DumbConnection
@@ -158,6 +163,7 @@ class CustomDragLayer extends Component {
       renderScene,
       renderSceneHeader,
       showConnections,
+      viewport,
     } = this.props;
 
     if (!isDragging || !currentSourceOffset || !initialSourceOffset) {
@@ -177,11 +183,12 @@ class CustomDragLayer extends Component {
     });
 
     const itemStyle = getItemStyles(this.props);
+    const renderData = {id: item.id, scale: viewport.scale};
     return (
       <div style={layerStyles}>
         <div style={itemStyle}>
-          {renderSceneHeader(item)}
-          {renderScene(item)}
+          {renderSceneHeader(renderData)}
+          {renderScene(renderData)}
         </div>
           {showConnections && Object.keys(connectionsInMotion)
             .map(key => this.renderConnection(connectionsInMotion[key]))

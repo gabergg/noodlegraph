@@ -11,6 +11,7 @@ class Scene extends Component {
     onTargetlessConnectionDrop: PropTypes.func.isRequired,
     renderScene: PropTypes.func.isRequired,
     scene: PropTypes.object.isRequired,
+    scale: PropTypes.number.isRequired,
   };
 
   componentDidMount() {
@@ -18,11 +19,11 @@ class Scene extends Component {
   }
 
   render() {
-    const { connectConnectionDragSource, renderScene, scene } = this.props;
+    const { connectConnectionDragSource, renderScene, scene, scale } = this.props;
 
     return connectConnectionDragSource(
       <div>
-        {renderScene(scene)}
+        {renderScene({id: scene.id, scale})}
       </div>
     )
   }

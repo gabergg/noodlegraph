@@ -6,6 +6,7 @@ import ItemTypes from '../constants/ItemTypes';
 import Connection from './Connection';
 import Pan from './Pan';
 import DraggableScene from './DraggableScene';
+import * as SceneUtils from '../utils/scene';
 import _ from 'lodash';
 
 const containerStyles = {
@@ -49,7 +50,7 @@ class Container extends Component {
 
   getScaledScene = (scene) => {
     const {viewport} = this.props;
-    
+
     return {
       ...scene,
       x: viewport.scale * (scene.x + viewport.x + viewport.width / 2),
@@ -58,17 +59,17 @@ class Container extends Component {
       height: viewport.scale * scene.height,
     };
   };
-  
+
   getScaledConnection = (connection) => {
     const {viewport} = this.props;
-    
+
     return {
       ...connection,
       startX: viewport.scale * (connection.startX + viewport.x + viewport.width / 2),
       startY: viewport.scale * (connection.startY + viewport.y + viewport.height / 2),
     };
   };
-  
+
   getEndingVertOffset = (connection, toScene) => {
     const connsEndingHere = _.sortBy(_.map(_.filter(this.props.connections, (conn, id) => {
       return conn.to === toScene.id;
@@ -118,18 +119,18 @@ class Container extends Component {
   }
 
   renderConnection(connection) {
-    const { onTargetedConnectionDrop, onTargetlessConnectionDrop, scenes } = this.props;
+    const { onTargetedConnectionDrop, onTargetlessConnectionDrop, scenes, viewport } = this.props;
     const { draggedConnection, draggedScene } = this.state;
-    const fromScene = this.getScaledScene(scenes[connection.from]);
-    const toScene = this.getScaledScene(scenes[connection.to]);
+    const fromScene = SceneUtils.getScaledScene(scenes[connection.from], viewport);
+    const toScene = SceneUtils.getScaledScene(scenes[connection.to], viewport);
     if ([fromScene.id, toScene.id].includes(draggedScene.id) ||
         connection.id === draggedConnection.id) {
       return null;
     }
     const endingVertOffset = this.getEndingVertOffset(connection, toScene);
-    
+
     connection = this.getScaledConnection(connection);
-    
+
     return (
       <Connection
         connection={connection}
@@ -159,8 +160,8 @@ class Container extends Component {
     if (draggedScene.id === scene.id)
       return null
 
-    scene = this.getScaledScene(scene)
-      
+    const scaledScene = SceneUtils.getScaledScene(scene, viewport)
+
     return (
       <DraggableScene
         connectionLocation={currentConnectionOrigin}
@@ -172,7 +173,9 @@ class Container extends Component {
         onTargetlessConnectionDrop={onTargetlessConnectionDrop}
         renderScene={renderScene}
         renderSceneHeader={renderSceneHeader}
+        scaledScene={scaledScene}
         scene={scene}
+        scale={viewport.scale}
         updateConnectionEnd={updateConnectionEnd}
         updateConnectionStart={updateConnectionStart}
       />
@@ -191,7 +194,7 @@ class Container extends Component {
       handlePanEnd,
       cursor,
     } = this.props;
-    
+
     const viewportStyle = {
       position: 'absolute',
       overflow: 'hidden',
@@ -199,9 +202,9 @@ class Container extends Component {
       height: viewport.height * viewport.scale,
       cursor,
     };
-    
+
     return connectDropTarget(
-      <div 
+      <div
         style={containerStyles}
         onMouseDown={handlePanStart}
         onMouseMove={handlePanMove}
@@ -220,13 +223,13 @@ class Container extends Component {
   }
 }
 
-const dropfun = (props, monitor) => {
+const onDrop = (props, monitor) => {
   const delta = monitor.getDifferenceFromInitialOffset()
   const scene = monitor.getItem()
 
   props.onDragSceneEnd(scene, delta);
 }
 
-export default DropTarget(ItemTypes.SCENE, {drop: dropfun}, connect => ({
+export default DropTarget(ItemTypes.SCENE, {drop: onDrop}, connect => ({
   connectDropTarget: connect.dropTarget()
 }))(Pan(Container))

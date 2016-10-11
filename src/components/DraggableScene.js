@@ -18,6 +18,8 @@ class DraggableScene extends Component {
     renderScene: PropTypes.func.isRequired,
     renderSceneHeader: PropTypes.func.isRequired,
     scene: PropTypes.object.isRequired,
+    scaledScene: PropTypes.object.isRequired,
+    scale: PropTypes.number.isRequired,
   };
 
   componentWillMount() {
@@ -40,20 +42,22 @@ class DraggableScene extends Component {
       renderScene,
       renderSceneHeader,
       scene,
+      scale,
+      scaledScene,
     } = this.props;
 
     const styles = {
       position: 'absolute',
-      left: scene.x,
-      top: scene.y,
+      left: scaledScene.x,
+      top: scaledScene.y,
     };
 
     return connectDropTarget(
       <div
         ref={(node) => {
-          if(node && !this.firedHeaderRef && scene.height > 0) {
+          if(node && !this.firedHeaderRef && scaledScene.height > 0) {
             this.firedHeaderRef = true;
-            onSceneHeaderRef(node.getBoundingClientRect().height - scene.height);
+            onSceneHeaderRef(node.getBoundingClientRect().height - scaledScene.height);
           }
         }}
         style={styles}>
@@ -61,6 +65,7 @@ class DraggableScene extends Component {
           key={`${scene.id}header`}
           renderSceneHeader={renderSceneHeader}
           scene={scene}
+          scale={scale}
           onSceneDragChange={onSceneDragChange}
         />
         <div onMouseDown={this.handleSceneMouseDown}>
@@ -69,6 +74,7 @@ class DraggableScene extends Component {
             key={scene.id}
             renderScene={renderScene}
             scene={scene}
+            scale={scale}
             onTargetlessConnectionDrop={onTargetlessConnectionDrop}
           />
         </div>

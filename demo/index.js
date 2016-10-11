@@ -24,18 +24,18 @@ export default class Demo extends Component {
     connections: {},
     viewport: ViewportUtils.init(measureWindow()),
   };
-  
+
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
   }
-  
+
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
   }
-  
+
   handleResize = () => {
     const {viewport} = this.state;
-    
+
     this.setState({
       viewport: ViewportUtils.resize(viewport, measureWindow())
     })
@@ -44,7 +44,7 @@ export default class Demo extends Component {
   handleChange = (data) => {
     this.setState({...data});
   }
-  
+
   handleViewportChange = (viewport) => {
     this.setState({viewport});
   }
@@ -56,18 +56,23 @@ export default class Demo extends Component {
     }
   }
 
-  renderScene = (scene) => {
+  renderScene = ({id, scale}) => {
+    const sceneProps = {
+      ...this.state.scenes[id],
+      scale,
+    };
+
     return (
-      <div key={scene.id}>
-        <Scene {...scene}/>
+      <div key={id}>
+        <Scene {...sceneProps}/>
       </div>
     );
   }
 
-  renderSceneHeader = (scene) => {
+  renderSceneHeader = ({id, scale}) => {
     return (
-      <div key={`${scene.id}header`}>
-        <SceneHeader scene={scene}/>
+      <div key={`${id}header`}>
+        <SceneHeader scale={scale} scene={this.state.scenes[id]}/>
       </div>
     );
   }

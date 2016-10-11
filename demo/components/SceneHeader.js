@@ -6,11 +6,13 @@ export default class SceneHeader extends Component {
     };
 
     render() {
-        const { scene } = this.props;
+        const { scene, scale } = this.props;
+        const scaledWidth = scale * scene.width;
+        const scaledHeight = scale * scene.height;
 
         const headerStyle = {
-          height: scene.height / 10,
-          width: scene.width,
+          height: scaledHeight / 10,
+          width: scaledWidth,
           textAlign: 'center',
           border: '1px solid black',
           borderBottom: '',
