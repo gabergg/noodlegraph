@@ -75,6 +75,7 @@
     "clean": "node run clean",
     "build": "node run build",
     "build:debug": "node run build --debug",
-    "start": "node run"
+    "start": "node run",
+    "watch": "node run watch"
   }
 }

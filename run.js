@@ -78,6 +78,25 @@ tasks.set('build', () => {
 });
 
 //
+// Watch the production build
+// -----------------------------------------------------------------------------
+tasks.set('watch', () => {
+  global.DEBUG = process.argv.includes('--debug') || false;
+  global.HMR = !process.argv.includes('--no-hmr'); // Hot Module Replacement (HMR)
+  const webpackConfig = require('./webpack.config');
+  webpackConfig.watch = true;
+  return run('clean').then(() => new Promise(() => {
+    webpack(webpackConfig, (err, stats) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(stats.toString(webpackConfig.stats));
+      }
+    });
+  }));
+});
+
+//
 // Build website and launch it in a browser for testing (default)
 // -----------------------------------------------------------------------------
 tasks.set('start', () => {
