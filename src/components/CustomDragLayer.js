@@ -21,7 +21,7 @@ const layerStyles = {
 function getItemStyles(props) {
   const { item, currentOffset, initialOffset, viewport } = props;
 
-  const scaledScene = CoordinateUtils.transformScene(item, viewport);
+  const scaledScene = CoordinateUtils.transformSceneToViewport(item, viewport);
 
   const xDelta = currentOffset.x - initialOffset.x;
   const yDelta = currentOffset.y - initialOffset.y;
@@ -34,21 +34,19 @@ function getItemStyles(props) {
 }
 
 function getModifiedScene(props, id) {
-  const { currentSourceOffset, initialSourceOffset, item, scenes } = props;
+  const { currentSourceOffset, initialSourceOffset, item, scenes, viewport } = props;
 
-  if (!initialSourceOffset || !currentSourceOffset) {
-    return item;
-  }
+  const scaledScene = CoordinateUtils.transformSceneToViewport(scenes[id], viewport);
 
   if (id === item.id) {
     return {
-      ...item,
+      ...scaledScene,
       x: currentSourceOffset.x,
       y: currentSourceOffset.y,
     };
   } else {
     return {
-      ...scenes[id]
+      ...scaledScene
     }
   }
 }
@@ -97,22 +95,26 @@ class CustomDragLayer extends Component {
   }
 
   renderConnection(connection) {
-    const { currentSourceOffset, initialSourceOffset, item } = this.props;
+    const { currentSourceOffset, initialSourceOffset, item, viewport } = this.props;
+
+    const scaledConnection = CoordinateUtils.transformConnectionToViewport(connection, viewport)
 
     const fromScene = getModifiedScene(this.props, connection.from);
     const toScene = getModifiedScene(this.props, connection.to);
+
     const itemIsTarget = item.id === toScene.id;
     const xDelta = currentSourceOffset.x - initialSourceOffset.x;
     const yDelta = currentSourceOffset.y - initialSourceOffset.y;
     const startX = itemIsTarget ?
-      connection.startX :
-      connection.startX + xDelta;
+      scaledConnection.startX :
+      scaledConnection.startX + xDelta;
     const startY = itemIsTarget ?
-      connection.startY :
-      connection.startY + yDelta;
-    const endingVertOffset = this.getEndingVertOffset(connection, toScene);
+      scaledConnection.startY :
+      scaledConnection.startY + yDelta;
+    const endingVertOffset = this.getEndingVertOffset(scaledConnection, toScene);
 
     const endLocation = getEndingConnectionLocation(toScene, fromScene.x < toScene.x, endingVertOffset);
+
     return <DumbConnection
       key={connection.id}
       startX={startX}
@@ -136,8 +138,8 @@ class CustomDragLayer extends Component {
   }
 
   renderExistingConnectionBeingDragged = (isStart) => {
-    const { currentOffset, initialOffset, item, scenes } = this.props;
-    const endScene = scenes[item.to];
+    const { currentOffset, initialOffset, item, scenes, viewport } = this.props;
+    const endScene = CoordinateUtils.transformSceneToViewport(scenes[item.to], viewport);
     const startingLoc = isStart ? currentOffset : {x: item.startX, y: item.startY}
     const endingVertOffset = this.getEndingVertOffset(item, endScene);
     const endingLoc = isStart ? getEndingConnectionLocation(endScene, initialOffset.x < endScene.x, endingVertOffset) : currentOffset;

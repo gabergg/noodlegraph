@@ -25,8 +25,8 @@ function getCircleStyle (x, y, end) {
     borderRadius: '50%',
     border: `${STROKE_WIDTH}px solid ${STROKE_COLOR}`,
     position: 'absolute',
-    left: x,
-    top: y,
+    left: x - circleOffset,
+    top: y - circleOffset,
     backgroundColor: STROKE_COLOR,
     zIndex: 2,
   };

@@ -48,16 +48,6 @@ class Container extends Component {
     sceneHeaderHeight: 0,
   };
 
-  getScaledConnection = (connection) => {
-    const {viewport} = this.props;
-
-    return {
-      ...connection,
-      startX: viewport.scale * (connection.startX + viewport.x + viewport.width / 2),
-      startY: viewport.scale * (connection.startY + viewport.y + viewport.height / 2),
-    };
-  };
-
   getEndingVertOffset = (connection, toScene) => {
     const connsEndingHere = _.sortBy(_.map(_.filter(this.props.connections, (conn, id) => {
       return conn.to === toScene.id;
@@ -74,15 +64,16 @@ class Container extends Component {
   handleDragConnectionStart = (scene, clickAbsolutePosition) => {
     const { onDragConnectionStart, viewport } = this.props;
     const { sceneHeaderHeight } = this.state;
+    clickAbsolutePosition = CoordinateUtils.transformPointToParent(clickAbsolutePosition, viewport);
     const clickRelativePosition = {
-      x: clickAbsolutePosition.x - scene.x - viewport.x,
-      y: clickAbsolutePosition.y - scene.y - viewport.y - sceneHeaderHeight,
+      x: clickAbsolutePosition.x - scene.x,
+      y: clickAbsolutePosition.y - scene.y,
     };
     const relativeStartLocation = onDragConnectionStart(scene, clickRelativePosition);
     const absoluteStartLocation = _.isEmpty(relativeStartLocation) ? null :
       {
-        x: relativeStartLocation.x + scene.x + viewport.x,
-        y: relativeStartLocation.y + scene.y + viewport.y + sceneHeaderHeight,
+        x: relativeStartLocation.x + scene.x,
+        y: relativeStartLocation.y + scene.y,
       };
 
     this.setState({
@@ -109,19 +100,19 @@ class Container extends Component {
   renderConnection(connection) {
     const { onTargetedConnectionDrop, onTargetlessConnectionDrop, scenes, viewport } = this.props;
     const { draggedConnection, draggedScene } = this.state;
-    const fromScene = CoordinateUtils.transformScene(scenes[connection.from], viewport);
-    const toScene = CoordinateUtils.transformScene(scenes[connection.to], viewport);
+    const fromScene = CoordinateUtils.transformSceneToViewport(scenes[connection.from], viewport);
+    const toScene = CoordinateUtils.transformSceneToViewport(scenes[connection.to], viewport);
     if ([fromScene.id, toScene.id].includes(draggedScene.id) ||
         connection.id === draggedConnection.id) {
       return null;
     }
-    const endingVertOffset = this.getEndingVertOffset(connection, toScene);
 
-    connection = this.getScaledConnection(connection);
+    const scaledConnection = CoordinateUtils.transformConnectionToViewport(connection, viewport);
+    const endingVertOffset = this.getEndingVertOffset(scaledConnection, toScene);
 
     return (
       <Connection
-        connection={connection}
+        connection={scaledConnection}
         endingScene={toScene}
         endingVertOffset={endingVertOffset}
         key={connection.id}
@@ -148,7 +139,7 @@ class Container extends Component {
     if (draggedScene.id === scene.id)
       return null
 
-    const scaledScene = CoordinateUtils.transformScene(scene, viewport)
+    const scaledScene = CoordinateUtils.transformSceneToViewport(scene, viewport)
 
     return (
       <DraggableScene
