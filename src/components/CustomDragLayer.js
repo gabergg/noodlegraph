@@ -18,14 +18,12 @@ const layerStyles = {
 };
 
 function getItemStyles(props) {
-  const { currentSourceOffset } = props;
-
-  let { x, y } = currentSourceOffset;
+  const { item, currentOffset, initialOffset } = props;
 
   return {
-    left: x,
-    top: y,
     position: 'absolute',
+    top: item.y + (currentOffset.y - initialOffset.y),
+    left: item.x + (currentOffset.x - initialOffset.x),
   };
 }
 
@@ -40,8 +38,8 @@ function getModifiedScene(props, id) {
     return {
       ...item,
       // need to dig into this mismatch.
-      x: currentSourceOffset.x - 8,
-      y: currentSourceOffset.y - 8,
+      x: currentSourceOffset.x,
+      y: currentSourceOffset.y,
     };
   } else {
     return {
