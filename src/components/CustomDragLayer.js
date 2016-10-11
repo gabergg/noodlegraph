@@ -5,7 +5,7 @@ import ItemTypes from '../constants/ItemTypes';
 import Connection from './Connection';
 import DumbConnection from './CustomDragLayer/DumbConnection';
 import SVGComponent from './SVGComponent';
-import * as SceneUtils from '../utils/scene';
+import * as CoordinateUtils from '../utils/coordinate';
 import getEndingConnectionLocation from '../utils/getEndingConnectionLocation';
 
 const layerStyles = {
@@ -21,7 +21,7 @@ const layerStyles = {
 function getItemStyles(props) {
   const { item, currentOffset, initialOffset, viewport } = props;
 
-  const scaledScene = SceneUtils.getScaledScene(item, viewport);
+  const scaledScene = CoordinateUtils.transformScene(item, viewport);
 
   const xDelta = currentOffset.x - initialOffset.x;
   const yDelta = currentOffset.y - initialOffset.y;

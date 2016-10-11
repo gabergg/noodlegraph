@@ -6,7 +6,7 @@ import ItemTypes from '../constants/ItemTypes';
 import Connection from './Connection';
 import Pan from './Pan';
 import DraggableScene from './DraggableScene';
-import * as SceneUtils from '../utils/scene';
+import * as CoordinateUtils from '../utils/coordinate';
 import _ from 'lodash';
 
 const containerStyles = {
@@ -46,18 +46,6 @@ class Container extends Component {
     currentConnectionOrigin: null,
     currentConnectionBox: null,
     sceneHeaderHeight: 0,
-  };
-
-  getScaledScene = (scene) => {
-    const {viewport} = this.props;
-
-    return {
-      ...scene,
-      x: viewport.scale * (scene.x + viewport.x + viewport.width / 2),
-      y: viewport.scale * (scene.y + viewport.y + viewport.height / 2),
-      width: viewport.scale * scene.width,
-      height: viewport.scale * scene.height,
-    };
   };
 
   getScaledConnection = (connection) => {
@@ -121,8 +109,8 @@ class Container extends Component {
   renderConnection(connection) {
     const { onTargetedConnectionDrop, onTargetlessConnectionDrop, scenes, viewport } = this.props;
     const { draggedConnection, draggedScene } = this.state;
-    const fromScene = SceneUtils.getScaledScene(scenes[connection.from], viewport);
-    const toScene = SceneUtils.getScaledScene(scenes[connection.to], viewport);
+    const fromScene = CoordinateUtils.transformScene(scenes[connection.from], viewport);
+    const toScene = CoordinateUtils.transformScene(scenes[connection.to], viewport);
     if ([fromScene.id, toScene.id].includes(draggedScene.id) ||
         connection.id === draggedConnection.id) {
       return null;
@@ -160,7 +148,7 @@ class Container extends Component {
     if (draggedScene.id === scene.id)
       return null
 
-    const scaledScene = SceneUtils.getScaledScene(scene, viewport)
+    const scaledScene = CoordinateUtils.transformScene(scene, viewport)
 
     return (
       <DraggableScene
