@@ -64,16 +64,18 @@ class Container extends Component {
   handleDragConnectionStart = (scene, clickAbsolutePosition) => {
     const { onDragConnectionStart, viewport } = this.props;
     const { sceneHeaderHeight } = this.state;
+    const scaledSceneHeaderHeight = sceneHeaderHeight / viewport.scale;
+
     clickAbsolutePosition = CoordinateUtils.transformPointToParent(clickAbsolutePosition, viewport);
     const clickRelativePosition = {
       x: clickAbsolutePosition.x - scene.x,
-      y: clickAbsolutePosition.y - scene.y,
+      y: clickAbsolutePosition.y - scene.y - scaledSceneHeaderHeight,
     };
     const relativeStartLocation = onDragConnectionStart(scene, clickRelativePosition);
     const absoluteStartLocation = _.isEmpty(relativeStartLocation) ? null :
       {
         x: relativeStartLocation.x + scene.x,
-        y: relativeStartLocation.y + scene.y,
+        y: relativeStartLocation.y + scene.y + scaledSceneHeaderHeight,
       };
 
     this.setState({
@@ -91,8 +93,8 @@ class Container extends Component {
     });
   }
 
-  handleSceneHeaderRef = (sceneHeaderHeight) => {
-    if(sceneHeaderHeight !== this.state.sceneHeaderHeight){
+  handleSceneHeaderHeight = (sceneHeaderHeight) => {
+    if (sceneHeaderHeight !== this.state.sceneHeaderHeight) {
       this.setState({sceneHeaderHeight});
     }
   }
@@ -136,8 +138,9 @@ class Container extends Component {
 
     const { currentConnectionOrigin, draggedScene } = this.state;
 
-    if (draggedScene.id === scene.id)
+    if (draggedScene.id === scene.id) {
       return null
+    }
 
     const scaledScene = CoordinateUtils.transformSceneToViewport(scene, viewport)
 
@@ -148,7 +151,7 @@ class Container extends Component {
         onDragConnectionEnd={onDragConnectionEnd}
         onDragConnectionStart={this.handleDragConnectionStart}
         onSceneDragChange={this.handleSceneDragChange}
-        onSceneHeaderRef={this.handleSceneHeaderRef}
+        onSceneHeaderHeight={this.handleSceneHeaderHeight}
         onTargetlessConnectionDrop={onTargetlessConnectionDrop}
         renderScene={renderScene}
         renderSceneHeader={renderSceneHeader}
