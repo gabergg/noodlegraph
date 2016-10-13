@@ -12,13 +12,16 @@ export default (Wrapped) => class Pan extends Component {
     onPanStart: PropTypes.func,
     onPanMove: PropTypes.func,
     onPanEnd: PropTypes.func,
-    captureEvents: PropTypes.bool.isRequired,
+    panKeyEnabled: PropTypes.bool,
+    panKeyPreventsDefault: PropTypes.bool,
   };
 
   static defaultProps = {
     onPanStart: () => {},
     onPanMove: () => {},
     onPanEnd: () => {},
+    panKeyEnabled: true,
+    panKeyPreventsDefault: true,
   };
 
   state = {};
@@ -34,13 +37,14 @@ export default (Wrapped) => class Pan extends Component {
   }
 
   handleKeyDown = (e) => {
-    if (!this.props.captureEvents) return
-
+    const {panKeyEnabled, panKeyPreventsDefault} = this.props
     const {panMode, panning, cursor} = this.state
 
-    if (e.code === 'Space') {
-      e.preventDefault()
-      e.stopPropagation()
+    if (panKeyEnabled && e.code === 'Space') {
+
+      if (panKeyPreventsDefault) {
+        e.preventDefault()
+      }
 
       if (!panMode) {
         this.setState({panMode: true})
@@ -53,11 +57,14 @@ export default (Wrapped) => class Pan extends Component {
   }
 
   handleKeyUp = (e) => {
+    const {panKeyEnabled, panKeyPreventsDefault} = this.props
     const {panMode, panning} = this.state
 
-    if (e.code === 'Space') {
-      e.preventDefault()
-      e.stopPropagation()
+    if (panKeyEnabled && e.code === 'Space') {
+
+      if (panKeyPreventsDefault) {
+        e.preventDefault()
+      }
 
       if (panMode) {
         this.setState({panMode: false})

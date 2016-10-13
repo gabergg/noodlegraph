@@ -9,7 +9,6 @@ import * as ViewportUtils from '../utils/viewport'
 
 class SceneGraph extends Component {
   static propTypes = {
-    focused: PropTypes.bool,
     onChange: PropTypes.func.isRequired,
     onDragConnectionStart: PropTypes.func.isRequired,
     renderScene: PropTypes.func.isRequired,
@@ -20,17 +19,27 @@ class SceneGraph extends Component {
     style: PropTypes.object,
     onViewportChange: PropTypes.func,
     viewport: PropTypes.object.isRequired,
+    panKeyEnabled: PropTypes.bool,
+    panKeyPreventsDefault: PropTypes.bool,
+    panGestureEnabled: PropTypes.bool,
+    panGestureSensitivity: PropTypes.number,
+    zoomKeysEnabled: PropTypes.bool,
     zoomFactor: PropTypes.number,
-    zoomSensitivity: PropTypes.number,
-    scrollSensitivity: PropTypes.number,
+    zoomGestureEnabled: PropTypes.bool,
+    zoomGestureSensitivity: PropTypes.number,
+
   }
 
   static defaultProps = {
     data: {},
-    focused: true,
+    panKeyEnabled: true,
+    panKeyPreventsDefault: true,
+    panGestureEnabled: true,
+    panGestureSensitivity: 1,
+    zoomKeysEnabled: true,
     zoomFactor: 2,
-    zoomSensitivity: 1,
-    scrollSensitivity: 1,
+    zoomGestureEnabled: true,
+    zoomGestureSensitivity: 1,
     showConnections: true,
     onConnectionChange: () => {},
     onViewportChange: () => {},
@@ -80,7 +89,7 @@ class SceneGraph extends Component {
     if (Object.keys(updatedConnections).length) {
       onConnectionChange('update', updatedConnections);
     }
-    
+
     onChange(update(data, {
       scenes: {
         [scene.id]: {
@@ -166,32 +175,32 @@ class SceneGraph extends Component {
       }));
     }
   }
-  
+
   moveViewport = (delta) => {
     const {viewport} = this.props;
     const newViewport = ViewportUtils.move(viewport, delta);
-    
+
     this.props.onViewportChange(newViewport);
   }
-  
+
   zoomViewport = (factor) => {
     const {viewport} = this.props;
     const newViewport = ViewportUtils.zoom(viewport, factor);
-    
+
     this.props.onViewportChange(newViewport);
   }
-  
-  handleKeyDown = (e) => {  
-    const {focused, zoomFactor} = this.props;
-    
+
+  handleKeyDown = (e) => {
+    const {zoomKeysEnabled, zoomFactor} = this.props;
+
     if (
-      focused &&
+      zoomKeysEnabled &&
       e.metaKey &&
       (e.code === 'Equal' || e.code === 'Minus')
     ) {
       e.preventDefault();
       e.stopPropagation();
-      
+
       if (e.code === 'Equal') {
         this.zoomViewport(zoomFactor);
       } else {
@@ -199,35 +208,35 @@ class SceneGraph extends Component {
       }
     }
   }
-  
+
   handleWheel = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const {deltaX, deltaY} = e;
-    const {zoomSensitivity, scrollSensitivity} = this.props;
-    
+    const {zoomGestureEnabled, panGestureEnabled, zoomGestureSensitivity, panGestureSensitivity} = this.props;
+
     // Zoom (ctrlKey indicates zoom)
-    if (e.ctrlKey) {
-      
+    if (zoomGestureEnabled && e.ctrlKey) {
+
       // Negative deltaY means zoom out, positive means zoom in.
-      // We subtract this delta from 1, since we later multiply by 
+      // We subtract this delta from 1, since we later multiply by
       // the current viewport scale.
-      this.zoomViewport(1 - (deltaY / 100) * zoomSensitivity);
-      
+      this.zoomViewport(1 - (deltaY / 100) * zoomGestureSensitivity);
+
     // Pan
-    } else {
+    } else if (panGestureEnabled) {
       this.moveViewport({
-        x: (-deltaX / 3) * scrollSensitivity, 
-        y: (-deltaY / 3) * scrollSensitivity,
+        x: (-deltaX / 3) * panGestureSensitivity,
+        y: (-deltaY / 3) * panGestureSensitivity,
       });
     }
   }
-  
+
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
-  
+
   componentWillUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
   }
@@ -237,6 +246,8 @@ class SceneGraph extends Component {
       data,
       focused,
       onDragConnectionStart,
+      panKeyEnabled,
+      panKeyPreventsDefault,
       renderScene,
       renderSceneHeader,
       showConnections,
@@ -245,12 +256,13 @@ class SceneGraph extends Component {
     } = this.props
 
     return (
-      <div 
+      <div
         style={style}
         onWheel={this.handleWheel}
       >
         <Container
-          captureEvents={focused}
+          panKeyEnabled={panKeyEnabled}
+          panKeyPreventsDefault={panKeyPreventsDefault}
           connections={data.connections}
           onDragConnectionEnd={this.handleDragConnectionEnd}
           onDragConnectionStart={onDragConnectionStart}
